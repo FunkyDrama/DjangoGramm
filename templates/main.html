@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}DjangoGramm{% endblock title %}
+
+{% block content %}
+  <h3>All posts</h3>
+
+  {% if posts %}
+    {% for post in posts %}
+      <div class="post">
+        <p>
+          <strong>{{ post.author.user.username }}</strong>
+          &bull; {{ post.created|date:"F j, Y, g:i a" }}
+        </p>
+        <p>{{ post.caption }}</p>
+
+        {% if post.images.all %}
+          <div class="post-images">
+            {% for image in post.images.all %}
+              <img
+                src="{{ image.get_preview_url }}"
+                alt="Image for {{ post.caption|truncatechars:20 }}"
+                style="max-width:300px; max-height:300px;"
+              />
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      <hr/>
+    {% endfor %}
+
+    {% if is_paginated %}
+      <div class="pagination">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  {% else %}
+    <p>No posts yet.</p>
+  {% endif %}
+{% endblock content %}

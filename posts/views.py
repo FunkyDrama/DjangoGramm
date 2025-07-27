@@ -1,7 +1,7 @@
 # posts/views.py
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.views.generic import CreateView
+from django.views.generic import CreateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from accounts.models import Profile
@@ -27,3 +27,11 @@ class PostCreateView(LoginRequiredMixin, CreateView):
             Image.objects.create(post=post, image=uploaded)
 
         return redirect(self.get_success_url())
+
+
+class AllPostsView(ListView):
+    model = Post
+    template_name = "main.html"
+    context_object_name = "posts"
+    paginate_by = 20
+    queryset = Post.objects.all().prefetch_related("images")
