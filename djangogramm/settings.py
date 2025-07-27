@@ -133,7 +133,6 @@ LOGOUT_URL = "logout"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-# Media files settings
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
@@ -142,3 +141,4 @@ EMAIL_HOST_USER = "cripswhigga18@gmail.com"
 EMAIL_HOST_PASSWORD = "vobm inkh bfzb rzkb"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
