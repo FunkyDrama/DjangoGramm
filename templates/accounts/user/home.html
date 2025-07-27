@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+  <h1>Welcome, {{ user.username }}!</h1>
+  <p>This is your home page. You can create a new posts and see all your posts</p>
+    <p><a href="{% url "post_create" %}">Create new post:</a></p>
+  <h2>All Your Posts</h2>
+
+  {% if posts %}
+    {% for post in posts %}
+      <div class="post">
+        <p><strong>Posted on:</strong> {{ post.created|date:"F j, Y, g:i a" }}</p>
+        <p>{{ post.caption }}</p>
+
+        {% if post.images.all %}
+          <div class="post-images">
+            {% for image in post.images.all %}
+              <img
+                src="{{ image.get_preview_url }}"
+                alt="Preview for {{ post.caption|truncatechars:20 }}"
+                style="max-width:300px; max-height:300px;"
+              />
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      <hr/>
+    {% endfor %}
+  {% else %}
+    <p>You have no posts yet.</p>
+  {% endif %}
+
+  <form method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+  </form>
+{% endblock content %}

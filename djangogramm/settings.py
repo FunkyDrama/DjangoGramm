@@ -31,12 +31,18 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    "accounts.apps.AccountsConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "posts.apps.PostsConfig",
+    "feed.apps.FeedConfig",
+    "tags.apps.TagsConfig",
+    "reactions.apps.ReactionsConfig",
+    "easy_thumbnails",
 ]
 
 MIDDLEWARE = [
@@ -54,8 +60,7 @@ ROOT_URLCONF = "djangogramm.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / 'templates']
-        ,
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -121,3 +126,19 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGIN_REDIRECT_URL = "home"
+LOGIN_URL = "login"
+LOGOUT_URL = "logout"
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# Media files settings
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_HOST_USER = "cripswhigga18@gmail.com"
+EMAIL_HOST_PASSWORD = "vobm inkh bfzb rzkb"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True

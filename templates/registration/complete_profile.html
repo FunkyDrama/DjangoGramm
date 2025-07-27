@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome{% endblock title %}
+
+{% block content %}
+	<h1>Welcome!</h1>
+	<p>
+		Your account has been successfully created.
+		Please, finish your profile creation by using the following form:
+    </p>
+    <form method="post">
+            {{ form.as_p }}
+            {% csrf_token %}
+            <input type="submit" value="Finish my profile">
+    </form>
+
+{% endblock content %}
