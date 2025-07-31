@@ -8,8 +8,16 @@ from posts.views import AllPostsView
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("accounts/", include("accounts.urls")),
+    path("", include("feed.urls")),
     path("posts/", include("posts.urls")),
-    path("", AllPostsView.as_view(), name="main")
+    path("", include("reactions.urls")),
+    path("", AllPostsView.as_view(), name="main"),
+    path("tags/", include("tags.urls")),
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += [
+        path("__reload__/", include("django_browser_reload.urls")),
+    ]

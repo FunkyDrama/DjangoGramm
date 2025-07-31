@@ -1,6 +1,12 @@
 from django.contrib.auth import views as auth_views
 from django.urls import path
-from .views import RegisterView, VerifyEmailView, CompleteProfileView, HomeView
+from .views import (
+    RegisterView,
+    VerifyEmailView,
+    CompleteProfileView,
+    HomeView,
+    ProfileDetailView,
+)
 
 urlpatterns = [
     path(
@@ -16,5 +22,6 @@ urlpatterns = [
     path("register/", RegisterView.as_view(), name="register"),
     path("verify/<uidb64>/<token>/", VerifyEmailView.as_view(), name="verify_email"),
     path("complete-profile/", CompleteProfileView.as_view(), name="complete_profile"),
+    path("u/<str:username>/", ProfileDetailView.as_view(), name="profile_detail"),
     path("", HomeView.as_view(), name="home"),
 ]

@@ -1,13 +1,19 @@
 from django.db import models
-
-from posts.models import Post
+from django.utils.text import slugify
 
 
 class Tag(models.Model):
-    post = models.ManyToManyField(Post, related_name="tags", blank=True)
     name = models.CharField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+    posts = models.ManyToManyField("posts.Post", related_name="tags", blank=True)
 
     class Meta:
-        verbose_name = "Tag"
-        verbose_name_plural = "Tags"
         ordering = ["name"]
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name

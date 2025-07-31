@@ -22,10 +22,12 @@ class RegisterForm(forms.Form):
         return cleaned_data
 
     def clean_email(self):
-        email = self.cleaned_data.get("email")
+        email = self.cleaned_data.get("email", "").strip().lower()
         if not email:
             raise forms.ValidationError("Email is required.")
-        if User.objects.filter(email=email).exists():
+
+        user = User.objects.filter(email__iexact=email).first()
+        if user and user.is_active:
             raise forms.ValidationError("Email is already in use.")
         return email
 

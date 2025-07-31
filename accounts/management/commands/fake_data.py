@@ -50,7 +50,7 @@ class Command(BaseCommand):
         :type parser: CommandParser
         :return: None
         """
-        parser.add_argument("count", type=int, help="Number of users to create")
+        parser.add_argument("--count", type=int, help="Number of users to create")
         parser.add_argument(
             "--no-avatar", action="store_true", help="Skip avatar generation"
         )
@@ -71,8 +71,8 @@ class Command(BaseCommand):
 
         """
         fake = Faker()
-        count = kwargs.get("--count")
-        with_avatar = kwargs.get("--no-avatar")
+        count = kwargs.get("count")
+        with_avatar = kwargs.get("no-avatar")
 
         for _ in range(count):
             email = fake.email()

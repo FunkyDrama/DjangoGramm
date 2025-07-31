@@ -3,11 +3,11 @@
 {% load thumbnail %}
 {% load hashtag %}
 
-{% block title %}DjangoGramm{% endblock title %}
+{% block title %}Following{% endblock title %}
 
 {% block content %}
   <div class="container mx-auto py-8">
-    <h3 class="font-semibold text-3xl mb-4">All posts</h3>
+    <h3 class="font-semibold text-3xl mb-4">Posts from Users You Follow</h3>
 
     {% if posts %}
       {% for post in posts %}
@@ -32,6 +32,7 @@
               </a>
               <span class="text-gray-500 ml-2">&bull; {{ post.created|date:"F j, Y" }}</span>
             </div>
+
             <p class="text-gray-700 mb-4 caption">{{ post.caption|linebreaks|hashtagify }}</p>
 
             {% if post.images.all %}
@@ -68,36 +69,36 @@
       {% if is_paginated %}
         <div class="flex justify-center items-center py-4">
           {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2">Предыдущая</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2">Previous</a>
           {% endif %}
 
-          <span class="text-gray-700">Page {{ page_obj.number }} from {{ page_obj.paginator.num_pages }}</span>
+          <span class="text-gray-700">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
 
           {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-2">Следующая</a>
+            <a href="?page={{ page_obj.next_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ml-2">Next</a>
           {% endif %}
         </div>
       {% endif %}
 
     {% else %}
-      <p class="text-gray-700">No posts yet.</p>
+      <p class="text-gray-700">No posts yet from people you follow.</p>
     {% endif %}
 
     {% if not user.is_authenticated %}
-        <div class="fixed bottom-10 left-0 right-0 bg-white border-t border-gray-200 px-4 py-4">
-          <div class="max-w-md mx-auto flex flex-col space-y-3">
-            <a href="{% url 'login' %}"
-               class="w-full py-2 px-4 bg-blue-600 text-white text-center rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
-              Login
+      <div class="fixed bottom-10 left-0 right-0 bg-white border-t border-gray-200 px-4 py-4">
+        <div class="max-w-md mx-auto flex flex-col space-y-3">
+          <a href="{% url 'login' %}"
+             class="w-full py-2 px-4 bg-blue-600 text-white text-center rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
+            Login
+          </a>
+          <p class="text-center text-sm text-gray-600">
+            Don't have an account?
+            <a href="{% url 'register' %}" class="text-blue-600 font-semibold hover:text-blue-800">
+              Register here
             </a>
-            <p class="text-center text-sm text-gray-600">
-              Don't have an account?
-              <a href="{% url 'register' %}" class="text-blue-600 font-semibold hover:text-blue-800">
-                Register here
-              </a>
-            </p>
-          </div>
+          </p>
         </div>
-      {% endif %}
+      </div>
+    {% endif %}
   </div>
 {% endblock content %}

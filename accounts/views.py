@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -11,28 +12,50 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views import View
 
 from accounts.forms import RegisterForm, ProfileForm
+from accounts.models import Profile
 from accounts.tokens import email_verification_token
+from feed.models import Follower
 from posts.models import Post
 
 
 class RegisterView(View):
-
     def get(self, request, *args, **kwargs):
         form = RegisterForm()
         return render(request, "registration/register.html", {"form": form})
 
     def post(self, request, *args, **kwargs):
-        # Handle registration logic here
         form = RegisterForm(request.POST)
         if form.is_valid():
+            email = form.cleaned_data["email"].strip()
+            password = form.cleaned_data["password1"]
 
-            email = request.POST.get("email")
-            password = request.POST.get("password")
+            existing = User.objects.filter(email=email).first()
+            if existing:
+                if not existing.is_active:
+                    uid = urlsafe_base64_encode(force_bytes(existing.pk))
+                    token = email_verification_token.make_token(existing)
+                    activation_link = request.build_absolute_uri(
+                        reverse("verify_email", kwargs={"uidb64": uid, "token": token})
+                    )
+                    send_mail(
+                        subject="Account Verification",
+                        message=f"Click this link to activate account: {activation_link}",
+                        recipient_list=[email],
+                        from_email=None,
+                    )
+                    messages.info(
+                        request, "Verification email resent. Please check your inbox."
+                    )
+                    return render(
+                        request, "registration/email_verify.html", {"resent": True}
+                    )
+                else:
+                    form.add_error("email", "Email is already in use.")
+                    return render(request, "registration/register.html", {"form": form})
 
             user = User.objects.create_user(
                 username=email, email=email, password=password, is_active=False
             )
-
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = email_verification_token.make_token(user)
             activation_link = request.build_absolute_uri(
@@ -44,7 +67,6 @@ class RegisterView(View):
                 recipient_list=[email],
                 from_email=None,
             )
-
             return render(request, "registration/email_verify.html")
         return render(request, "registration/register.html", {"form": form})
 
@@ -75,7 +97,10 @@ class CompleteProfileView(View):
     def get(self, request):
         form = self.form_class(
             initial={
-                "username": "Enter your username here",
+                "username": "",
+                "first_name": request.user.first_name,
+                "last_name": request.user.last_name,
+                "bio": getattr(request.user.profile, "bio", ""),
             }
         )
         return render(request, self.template_name, {"form": form})
@@ -108,5 +133,29 @@ class HomeView(View):
             {
                 "user": request.user,
                 "posts": posts,
+            },
+        )
+
+
+@method_decorator(login_required, name="dispatch")
+class ProfileDetailView(View):
+    def get(self, request, username):
+        target = get_object_or_404(Profile, user__username=username)
+        posts = Post.objects.filter(author=target).prefetch_related("images")
+
+        is_following = False
+        if request.user.is_authenticated:
+            me = request.user.profile
+            is_following = Follower.objects.filter(
+                follower=me, following=target
+            ).exists()
+
+        return render(
+            request,
+            "accounts/user/profile_detail.html",
+            {
+                "target_profile": target,
+                "posts": posts,
+                "is_following": is_following,
             },
         )

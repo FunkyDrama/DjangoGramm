@@ -1,4 +1,8 @@
 from django.contrib import admin
-from tags.models import Tag
+from .models import Tag
 
-admin.site.register(Tag)
+
+@admin.register(Tag)
+class TagAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug")
+    search_fields = ("name",)
