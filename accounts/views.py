@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.http import HttpResponse
@@ -10,6 +11,7 @@ from django.utils.decorators import method_decorator
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views import View
+from django.views.generic import DetailView
 
 from accounts.forms import RegisterForm, ProfileForm
 from accounts.models import Profile
@@ -19,6 +21,22 @@ from posts.models import Post
 
 
 class RegisterView(View):
+
+    @staticmethod
+    def _send_verification(user, request):
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = email_verification_token.make_token(user)
+        activation_link = request.build_absolute_uri(
+            reverse("verify_email", kwargs={"uidb64": uid, "token": token})
+        )
+        send_mail(
+            subject="Account Verification",
+            message=f"Click this link to activate account: {activation_link}",
+            recipient_list=[user.email],
+            from_email=None,
+        )
+        return activation_link
+
     def get(self, request, *args, **kwargs):
         form = RegisterForm()
         return render(request, "registration/register.html", {"form": form})
@@ -28,21 +46,10 @@ class RegisterView(View):
         if form.is_valid():
             email = form.cleaned_data["email"].strip()
             password = form.cleaned_data["password1"]
-
-            existing = User.objects.filter(email=email).first()
+            existing = User.objects.filter(email__iexact=email).first()
             if existing:
                 if not existing.is_active:
-                    uid = urlsafe_base64_encode(force_bytes(existing.pk))
-                    token = email_verification_token.make_token(existing)
-                    activation_link = request.build_absolute_uri(
-                        reverse("verify_email", kwargs={"uidb64": uid, "token": token})
-                    )
-                    send_mail(
-                        subject="Account Verification",
-                        message=f"Click this link to activate account: {activation_link}",
-                        recipient_list=[email],
-                        from_email=None,
-                    )
+                    self._send_verification(existing, request)
                     messages.info(
                         request, "Verification email resent. Please check your inbox."
                     )
@@ -56,18 +63,9 @@ class RegisterView(View):
             user = User.objects.create_user(
                 username=email, email=email, password=password, is_active=False
             )
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            token = email_verification_token.make_token(user)
-            activation_link = request.build_absolute_uri(
-                reverse("verify_email", kwargs={"uidb64": uid, "token": token})
-            )
-            send_mail(
-                subject="Account Verification",
-                message=f"Click this link to activate account: {activation_link}",
-                recipient_list=[email],
-                from_email=None,
-            )
+            self._send_verification(user, request)
             return render(request, "registration/email_verify.html")
+
         return render(request, "registration/register.html", {"form": form})
 
 
@@ -137,8 +135,7 @@ class HomeView(View):
         )
 
 
-@method_decorator(login_required, name="dispatch")
-class ProfileDetailView(View):
+class ProfileDetailView(LoginRequiredMixin, DetailView):
     def get(self, request, username):
         target = get_object_or_404(Profile, user__username=username)
         posts = Post.objects.filter(author=target).prefetch_related("images")
