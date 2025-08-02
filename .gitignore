@@ -3,3 +3,4 @@
 __pycache__
 DjangoGramm.pem
 .env
+assets/node_modules
