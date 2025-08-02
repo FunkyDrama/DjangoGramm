@@ -1,5 +1,5 @@
 {% load static %}
-{% load static tailwind_tags %}
+{% load webpack_manifest %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -7,8 +7,7 @@
     <meta charset="UTF-8">
     <title>{% block title %}{% endblock title %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-    {% tailwind_css %}
+    <link rel="stylesheet" href="{% static 'dist/' %}{% webpack_asset 'bundle.css' %}">
 </head>
 <body>
     <div class="header h-auto pb-10">
@@ -20,7 +19,7 @@
         {% block content %}
         {% endblock content %}
     </div>
-<nav class="flex fixed bottom-0 w-screen justify-center items-center bg-gray-100 py-1">
+<nav class="flex fixed bottom-0 w-screen justify-center items-center py-1">
   <a href="{% url 'main' %}" class="px-6 py-2 rounded hover:bg-gray-200 transition duration-200 font-semibold">Main feed</a>
   {% if user.is_authenticated %}
     | <a href="{% url 'following_feed' %}" class="px-6 py-2 rounded hover:bg-gray-200 transition duration-200 font-semibold">Following</a>
@@ -28,6 +27,6 @@
     | <a href="{% url 'home' %}" class="px-6 py-2 rounded hover:bg-gray-200 transition duration-200 font-semibold">Home</a>
   {% endif %}
 </nav>
-
+<script src="{% static 'dist/' %}{% webpack_asset 'bundle.js' %}" defer></script>
 </body>
 </html>

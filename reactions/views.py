@@ -1,10 +1,11 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
 
 from posts.models import Post
-from .models import Like
+from reactions.models import Like
 
 
 class ReactionView(LoginRequiredMixin, View):
@@ -20,14 +21,29 @@ class ReactionView(LoginRequiredMixin, View):
         if not created:
             if obj.is_dislike == is_dislike:
                 obj.delete()
+                action = "removed"
             else:
                 obj.is_dislike = is_dislike
                 obj.save()
+                action = "switched"
+        else:
+            action = "added"
 
-        next_url = request.POST.get("next")
-        if not next_url:
-            next_url = request.META.get("HTTP_REFERER")
-        if not next_url:
-            next_url = reverse("feed")
+        likes = post.likes.filter(is_dislike=False).count()
+        dislikes = post.likes.filter(is_dislike=True).count()
 
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse(
+                {
+                    "likes": likes,
+                    "dislikes": dislikes,
+                    "action": action,
+                }
+            )
+
+        next_url = (
+            request.POST.get("next")
+            or request.META.get("HTTP_REFERER")
+            or reverse("feed")
+        )
         return redirect(next_url)

@@ -1,5 +1,4 @@
-# posts/views.py
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.generic import CreateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -34,4 +33,18 @@ class AllPostsView(ListView):
     template_name = "main.html"
     context_object_name = "posts"
     paginate_by = 20
-    queryset = Post.objects.all().prefetch_related("images")
+
+    def get_queryset(self):
+        return (
+            super().get_queryset().select_related("author").prefetch_related("images")
+        )
+
+    def get(self, request, *args, **kwargs):
+        self.object_list = self.get_queryset()
+        context = self.get_context_data()
+
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+
+            return render(request, "posts/posts_list.html", context)
+
+        return super().get(request, *args, **kwargs)

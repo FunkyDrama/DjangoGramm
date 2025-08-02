@@ -6,7 +6,7 @@
   <div class="max-w-xl mx-auto py-10">
     <h1 class="text-2xl font-semibold mb-6">Create a New Post</h1>
 
-    <form method="post" enctype="multipart/form-data" class="bg-white shadow rounded-lg p-6 space-y-6">
+    <form method="post" enctype="multipart/form-data" class="shadow rounded-lg p-6 space-y-6">
       {% csrf_token %}
       {{ form.non_field_errors }}
       {% if form.non_field_errors %}

@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, reverse
 from django.views.generic import ListView, RedirectView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -8,13 +9,16 @@ from .models import Follower
 
 
 class FollowView(LoginRequiredMixin, RedirectView):
-
     def post(self, request, username, *args, **kwargs):
         me = request.user.profile
         target = get_object_or_404(Profile, user__username=username)
         if me != target:
             Follower.objects.get_or_create(follower=me, following=target)
         self.username = username
+
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"is_following": True, "username": username})
+
         return super().post(request, *args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
@@ -22,12 +26,15 @@ class FollowView(LoginRequiredMixin, RedirectView):
 
 
 class UnfollowView(LoginRequiredMixin, RedirectView):
-
     def post(self, request, username, *args, **kwargs):
         me = request.user.profile
         target = get_object_or_404(Profile, user__username=username)
         Follower.objects.filter(follower=me, following=target).delete()
         self.username = username
+
+        if request.headers.get("x-requested-with") == "XMLHttpRequest":
+            return JsonResponse({"is_following": False, "username": username})
+
         return super().post(request, *args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
