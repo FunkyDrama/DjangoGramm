@@ -123,7 +123,7 @@ class CompleteProfileView(View):
 class HomeView(View):
 
     def get(self, request):
-        profile = request.user.profile
+        profile, _ = Profile.objects.get_or_create(user=request.user)
         posts = Post.objects.filter(author=profile).prefetch_related("images")
         return render(
             request,

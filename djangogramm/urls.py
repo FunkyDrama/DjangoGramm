@@ -13,6 +13,7 @@ urlpatterns = [
     path("", include("reactions.urls")),
     path("", AllPostsView.as_view(), name="main"),
     path("tags/", include("tags.urls")),
+    path("social-auth/", include("social_django.urls", namespace="social")),
 ]
 
 if settings.DEBUG:

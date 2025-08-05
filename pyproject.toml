@@ -16,6 +16,7 @@ dependencies = [
     "django-cloudinary-storage (>=0.3.0,<0.4.0)",
     "python-dotenv[cli] (>=1.1.1,<2.0.0)",
     "whitenoise (>=6.9.0,<7.0.0)",
+    "social-auth-app-django (>=5.5.1,<6.0.0)",
 ]
 
 
