@@ -1,0 +1,87 @@
+name: Deploy Djangogramm
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+          POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          EMAIL_HOST_USER: ${{ secrets.EMAIL_HOST_USER }}
+          EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
+          CLOUD_NAME: ${{ secrets.CLOUD_NAME }}
+          API_KEY: ${{ secrets.API_KEY }}
+          API_SECRET: ${{ secrets.API_SECRET }}
+          CLOUDINARY_URL: ${{ secrets.CLOUDINARY_URL }}
+          SOCIAL_AUTH_GOOGLE_OAUTH2_KEY: ${{ secrets.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY }}
+          SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET: ${{ secrets.SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET }}
+          SOCIAL_AUTH_GITHUB_KEY: ${{ secrets.SOCIAL_AUTH_GITHUB_KEY }}
+          SOCIAL_AUTH_GITHUB_SECRET: ${{ secrets.SOCIAL_AUTH_GITHUB_SECRET }}
+        with:
+            host: ${{ secrets.SERVER_HOST }}
+            username: ${{ secrets.SERVER_USER }}
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
+            command_timeout: 20m
+            envs: SECRET_KEY,POSTGRES_DB,POSTGRES_USER,POSTGRES_HOST,POSTGRES_PORT,POSTGRES_PASSWORD,EMAIL_HOST_USER,EMAIL_HOST_PASSWORD,CLOUD_NAME,API_KEY,API_SECRET,CLOUDINARY_URL,SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET,SOCIAL_AUTH_GITHUB_KEY,SOCIAL_AUTH_GITHUB_SECRET
+            script: |
+              cd ~/projects/djangogramm
+              echo "🚀 Starting deployment..."
+              if [ ! -f .env ]; then
+                echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env
+                echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+                echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+                echo "POSTGRES_HOST=${{ secrets.POSTGRES_HOST }}" >> .env
+                echo "POSTGRES_PORT=${{ secrets.POSTGRES_PORT }}" >> .env
+                echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+                echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> .env
+                echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
+                echo "CLOUD_NAME=${{ secrets.CLOUD_NAME }}" >> .env
+                echo "API_KEY=${{ secrets.API_KEY }}" >> .env
+                echo "API_SECRET=${{ secrets.API_SECRET }}" >> .env
+                echo "CLOUDINARY_URL=${{ secrets.CLOUDINARY_URL }}" >> .env
+                echo "SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=${{ secrets.SOCIAL_AUTH_GOOGLE_OAUTH2_KEY }}" >> .env
+                echo "SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=${{ secrets.SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET }}" >> .env
+                echo "SOCIAL_AUTH_GITHUB_KEY=${{ secrets.SOCIAL_AUTH_GITHUB_KEY }}" >> .env
+                echo "SOCIAL_AUTH_GITHUB_SECRET=${{ secrets.SOCIAL_AUTH_GITHUB_SECRET }}" >> .env
+              fi
+              
+              if [ ! -d ".git" ]; then
+              git init
+              git remote add origin https://github.com/FunkyDrama/DjangoGramm.git
+              fi
+              
+              echo "📥 Fetching latest code..."
+              git fetch origin
+              git reset --hard origin/dev
+              
+              echo "🔨 Building Docker images..."
+              docker compose build
+              
+              echo "🚢 Starting containers..."
+              docker compose up -d
+              
+              echo "🧹 Cleaning up old images..."
+              docker image prune -f
+              
+              echo "✅ Deployment completed!"
+
+      - name: Send deployment notification
+        if: always()
+        run: |
+          echo "Deployment status: ${{ job.status }}"

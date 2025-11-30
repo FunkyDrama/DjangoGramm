@@ -75,10 +75,23 @@ class VerifyEmailView(View):
             uid = urlsafe_base64_decode(uidb64).decode()
             user = get_object_or_404(User, pk=uid)
 
+            if user.is_active:
+                login(
+                    request,
+                    user,
+                    backend="django.contrib.auth.backends.ModelBackend",
+                )
+                messages.success(request, "Your account is already verified!")
+                return redirect("complete_profile")
+
             if email_verification_token.check_token(user, token):
                 user.is_active = True
                 user.save()
-                login(request, user)
+                login(
+                    request,
+                    user,
+                    backend="django.contrib.auth.backends.ModelBackend",
+                )
                 return redirect("complete_profile")
             else:
                 return HttpResponse("Email verification failed.", status=400)

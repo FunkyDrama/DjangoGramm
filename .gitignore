@@ -1,6 +1,8 @@
 .idea
 .venv
 __pycache__
-DjangoGramm.pem
+
 .env
-assets/node_modules
+assets/node_modules/
+static/dist/
+staticfiles/

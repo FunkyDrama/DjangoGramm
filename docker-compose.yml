@@ -1,0 +1,87 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: djangogramm_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 128M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: djangogramm_web
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    networks:
+      - internal
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  nginx:
+    image: nginx:alpine
+    container_name: djangogramm_nginx
+    restart: unless-stopped
+    volumes:
+      - static_volume:/static:ro
+      - media_volume:/media:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - web
+    networks:
+      - web
+      - internal
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 64M
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=web"
+      - "traefik.http.routers.djangogramm.rule=Host(`djangogramm.danielkravchenko.dev`)"
+      - "traefik.http.routers.djangogramm.entrypoints=websecure"
+      - "traefik.http.routers.djangogramm.tls.certresolver=letsencrypt"
+      - "traefik.http.services.djangogramm.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.djangogramm-redirect.redirectscheme.scheme=https"
+      - "traefik.http.routers.djangogramm-http.rule=Host(`djangogramm.danielkravchenko.dev`)"
+      - "traefik.http.routers.djangogramm-http.entrypoints=web"
+      - "traefik.http.routers.djangogramm-http.middlewares=djangogramm-redirect"
+
+networks:
+  web:
+    external: true
+  internal:
+    driver: bridge
+    name: djangogramm_internal
+
+volumes:
+  postgres_data:
+    name: djangogramm_postgres_data
+  static_volume:
+    name: djangogramm_static
+  media_volume:
+    name: djangogramm_media

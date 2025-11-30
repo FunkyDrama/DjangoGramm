@@ -2,7 +2,8 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 
 class EmailVerificationTokenGenerator(PasswordResetTokenGenerator):
-    pass
+    def _make_hash_value(self, user, timestamp):
+        return str(user.pk) + user.password + str(timestamp)
 
 
 email_verification_token = EmailVerificationTokenGenerator()

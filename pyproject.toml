@@ -17,6 +17,8 @@ dependencies = [
     "python-dotenv[cli] (>=1.1.1,<2.0.0)",
     "whitenoise (>=6.9.0,<7.0.0)",
     "social-auth-app-django (>=5.5.1,<6.0.0)",
+    "gunicorn (>=23.0.0,<24.0.0)",
+    "psycopg2-binary (>=2.9.11,<3.0.0)",
 ]
 
 
