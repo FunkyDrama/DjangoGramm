@@ -4,49 +4,51 @@
 {% block title %}Following{% endblock title %}
 
 {% block content %}
-  <div class="container mx-auto py-8" id="posts-container">
-    <h3 class="font-semibold text-3xl mb-4">Posts from Users You Follow</h3>
+    <div class="container mx-auto py-8" id="posts-container">
+        <h3 class="font-semibold text-3xl mb-4 text-center">Posts from Users You Follow</h3>
 
-    {% if posts %}
-      {% include "posts/posts_list.html" %}
+        {% if posts %}
+            {% include "posts/posts_list.html" %}
 
-      {% if is_paginated %}
-        <div id="pagination-info" class="flex justify-center items-center py-4">
-          {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">Previous</a>
-          {% endif %}
-          <span class="text-gray-700">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-          {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2">Next</a>
-          {% endif %}
-        </div>
-      {% endif %}
+            {% if is_paginated %}
+                <div id="pagination-info" class="flex justify-center items-center py-4">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}"
+                           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">Previous</a>
+                    {% endif %}
+                    <span class="text-gray-700">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}"
+                           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2">Next</a>
+                    {% endif %}
+                </div>
+            {% endif %}
 
-      <div
-        id="scroll-sentinel"
-        data-current-page="{{ page_obj.number|default:1 }}"
-        data-total-pages="{{ page_obj.paginator.num_pages|default:1 }}"
-        class="h-1"
-      ></div>
-    {% else %}
-      <p class="text-gray-700">No posts yet from people you follow.</p>
-    {% endif %}
+            <div
+                    id="scroll-sentinel"
+                    data-current-page="{{ page_obj.number|default:1 }}"
+                    data-total-pages="{{ page_obj.paginator.num_pages|default:1 }}"
+                    class="h-1"
+            ></div>
+        {% else %}
+            <p class="text-gray-700">No posts yet from people you follow.</p>
+        {% endif %}
 
-    {% if not user.is_authenticated %}
-      <div class="fixed bottom-10 left-0 right-0 bg-white border-t border-gray-200 px-4 py-4">
-        <div class="max-w-md mx-auto flex flex-col space-y-3">
-          <a href="{% url 'login' %}"
-             class="w-full py-2 px-4 bg-blue-600 text-white text-center rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
-            Login
-          </a>
-          <p class="text-center text-sm text-gray-600">
-            Don't have an account?
-            <a href="{% url 'register' %}" class="text-blue-600 font-semibold hover:text-blue-800">
-              Register here
-            </a>
-          </p>
-        </div>
-      </div>
-    {% endif %}
-  </div>
+        {% if not user.is_authenticated %}
+            <div class="fixed bottom-10 left-0 right-0 bg-white border-t border-gray-200 px-4 py-4">
+                <div class="max-w-md mx-auto flex flex-col space-y-3">
+                    <a href="{% url 'login' %}"
+                       class="w-full py-2 px-4 bg-blue-600 text-white text-center rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
+                        Login
+                    </a>
+                    <p class="text-center text-sm text-gray-600">
+                        Don't have an account?
+                        <a href="{% url 'register' %}" class="text-blue-600 font-semibold hover:text-blue-800">
+                            Register here
+                        </a>
+                    </p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
 {% endblock content %}

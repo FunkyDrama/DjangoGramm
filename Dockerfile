@@ -35,7 +35,7 @@ COPY . .
 
 COPY --from=frontend-builder /app/static/dist/ ./static/dist/
 
-RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput --clear
 
 RUN curl -sSLo /usr/local/bin/wait-for-it \
     https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \

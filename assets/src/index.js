@@ -1,4 +1,5 @@
 import './styles.css';
+import logoUrl from './logo.svg';
 
 const FETCH_CONFIG = {
     headers: {
@@ -13,6 +14,12 @@ const CSS_CLASSES = {
         inactive: ["bg-blue-500", "hover:bg-blue-600"]
     }
 };
+
+const favicon = document.createElement("link");
+favicon.rel = "icon";
+favicon.type = "image/svg+xml";
+favicon.href = logoUrl;
+document.head.appendChild(favicon);
 
 function getCookie(name) {
     const value = `; ${document.cookie}`;
