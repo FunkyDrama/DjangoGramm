@@ -45,6 +45,8 @@ services:
     image: nginx:alpine
     container_name: djangogramm_nginx
     restart: unless-stopped
+    ports:
+      - "3004:80"
     volumes:
       - static_volume:/static:ro
       - media_volume:/media:ro
@@ -52,28 +54,14 @@ services:
     depends_on:
       - web
     networks:
-      - web
       - internal
     deploy:
       resources:
         limits:
           cpus: '0.2'
           memory: 64M
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=web"
-      - "traefik.http.routers.djangogramm.rule=Host(`djangogramm.danielkravchenko.dev`)"
-      - "traefik.http.routers.djangogramm.entrypoints=websecure"
-      - "traefik.http.routers.djangogramm.tls.certresolver=letsencrypt"
-      - "traefik.http.services.djangogramm.loadbalancer.server.port=80"
-      - "traefik.http.middlewares.djangogramm-redirect.redirectscheme.scheme=https"
-      - "traefik.http.routers.djangogramm-http.rule=Host(`djangogramm.danielkravchenko.dev`)"
-      - "traefik.http.routers.djangogramm-http.entrypoints=web"
-      - "traefik.http.routers.djangogramm-http.middlewares=djangogramm-redirect"
 
 networks:
-  web:
-    external: true
   internal:
     driver: bridge
     name: djangogramm_internal
