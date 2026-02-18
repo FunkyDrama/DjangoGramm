@@ -1,49 +1,35 @@
 {% extends "base.html" %}
-{% load hashtag %}
 
 {% block title %}DjangoGramm{% endblock title %}
 
 {% block content %}
-  <div class="container mx-auto py-8" id="posts-container">
-    <h3 class="font-semibold text-3xl mb-4 text-center">All posts</h3>
+<div class="w-full max-w-[600px] mx-auto py-2 sm:py-6" id="posts-container">
 
     {% if posts %}
-      {% include "posts/posts_list.html" %}
-      <div id="pagination-info" class="flex justify-center items-center py-4">
-        {% if page_obj.has_previous %}
-          <a href="?page={{ page_obj.previous_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">Previous</a>
-        {% endif %}
-        <span class="text-gray-700">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-        {% if page_obj.has_next %}
-          <a href="?page={{ page_obj.next_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2">Next</a>
-        {% endif %}
-      </div>
+        {% include "posts/posts_list.html" %}
 
-      <div
-        id="scroll-sentinel"
-        data-current-page="{{ page_obj.number|default:1 }}"
-        data-total-pages="{{ page_obj.paginator.num_pages|default:1 }}"
-        class="h-1"
-      ></div>
-    {% else %}
-      <p class="text-gray-700">No posts yet.</p>
-    {% endif %}
+        <div
+            id="scroll-sentinel"
+            data-current-page="{{ page_obj.number|default:1 }}"
+            data-total-pages="{{ page_obj.paginator.num_pages|default:1 }}"
+            class="h-4"
+        ></div>
 
-    {% if not user.is_authenticated %}
-      <div class="fixed bottom-10 left-0 right-0 bg-white border-t border-gray-200 px-4 py-4">
-        <div class="max-w-md mx-auto flex flex-col space-y-3">
-          <a href="{% url 'login' %}"
-             class="w-full py-2 px-4 bg-blue-600 text-white text-center rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200">
-            Login
-          </a>
-          <p class="text-center text-sm text-gray-600">
-            Don't have an account?
-            <a href="{% url 'register' %}" class="text-blue-600 font-semibold hover:text-blue-800">
-              Register here
-            </a>
-          </p>
+        <div id="load-spinner" class="hidden flex justify-center py-6">
+            <div class="w-6 h-6 border-2 border-[#dbdbdb] border-t-[#262626] rounded-full animate-spin"></div>
         </div>
-      </div>
+
+    {% else %}
+        <div class="flex flex-col items-center justify-center py-20 text-center px-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" stroke="#dbdbdb"
+                 stroke-width="1.5" viewBox="0 0 24 24" class="mb-4">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <p class="text-[#8e8e8e] text-sm">No posts yet</p>
+        </div>
     {% endif %}
-  </div>
+
+</div>
 {% endblock content %}

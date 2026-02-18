@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -21,7 +22,6 @@ from posts.models import Post
 
 
 class RegisterView(View):
-
     @staticmethod
     def _send_verification(user, request):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -29,9 +29,14 @@ class RegisterView(View):
         activation_link = request.build_absolute_uri(
             reverse("verify_email", kwargs={"uidb64": uid, "token": token})
         )
+        html_message = render_to_string(
+            "registration/email_verification_email.html",
+            {"activation_link": activation_link},
+        )
         send_mail(
-            subject="Account Verification",
-            message=f"Click this link to activate account: {activation_link}",
+            subject="Verify your email – DjangoGramm",
+            message=f"Activate your account: {activation_link}",
+            html_message=html_message,
             recipient_list=[user.email],
             from_email=None,
         )
@@ -134,18 +139,8 @@ class CompleteProfileView(View):
 
 @method_decorator(login_required, name="dispatch")
 class HomeView(View):
-
     def get(self, request):
-        profile, _ = Profile.objects.get_or_create(user=request.user)
-        posts = Post.objects.filter(author=profile).prefetch_related("images")
-        return render(
-            request,
-            "accounts/user/home.html",
-            {
-                "user": request.user,
-                "posts": posts,
-            },
-        )
+        return redirect("profile_detail", username=request.user.username)
 
 
 class ProfileDetailView(LoginRequiredMixin, DetailView):
@@ -160,6 +155,9 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
                 follower=me, following=target
             ).exists()
 
+        followers_count = Follower.objects.filter(following=target).count()
+        following_count = Follower.objects.filter(follower=target).count()
+
         return render(
             request,
             "accounts/user/profile_detail.html",
@@ -167,5 +165,8 @@ class ProfileDetailView(LoginRequiredMixin, DetailView):
                 "target_profile": target,
                 "posts": posts,
                 "is_following": is_following,
+                "followers_count": followers_count,
+                "following_count": following_count,
+                "posts_count": posts.count(),
             },
         )

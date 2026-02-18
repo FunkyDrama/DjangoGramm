@@ -1,91 +1,124 @@
 {% extends "base.html" %}
-{% load hashtag %}
 
-{% block title %}Profile: {{ target_profile.user.username }}{% endblock title %}
+{% block title %}{{ target_profile.user.username }}{% endblock title %}
 
 {% block content %}
-<div class="container mx-auto py-8" id="posts-container">
-    <div class="mb-6 flex items-center space-x-4">
-      {% if target_profile.avatar %}
-        <img
-          src="{{ target_profile.avatar.url }}"
-          alt="{{ target_profile.user.username }}'s avatar"
-          class="w-20 h-20 rounded-full object-cover"
-        />
-      {% else %}
-        <div class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-          <span class="text-3xl font-semibold text-gray-500">
-            {{ target_profile.user.username|slice:":1"|upper }}
-          </span>
-        </div>
-      {% endif %}
+<div class="w-full max-w-[600px] mx-auto" id="posts-container">
 
-      <div id="follow-container" data-username="{{ target_profile.user.username }}">
-          {% if user.is_authenticated and user.username != target_profile.user.username %}
-            <h1 class="font-semibold text-2xl mb-1">{{ target_profile.user.username }}</h1>
-            <button
-              id="follow-btn"
-              type="button"
-              data-following="{{ is_following|yesno:'true,false' }}"
-              data-follow-url="{% url 'profile_follow' target_profile.user.username %}"
-              data-unfollow-url="{% url 'profile_unfollow' target_profile.user.username %}"
-              class="px-4 py-1 rounded font-semibold transition
-                     {% if is_following %}
-                       bg-red-500 hover:bg-red-600 text-white
-                     {% else %}
-                       bg-blue-500 hover:bg-blue-600 text-white
-                     {% endif %}"
-            >
-              {% if is_following %}Unfollow{% else %}Follow{% endif %}
-            </button>
-          {% endif %}
+    <div class="px-4 pt-6 pb-4 sm:pt-8">
+        <div class="flex items-center gap-6 mb-4">
+
+            {% if target_profile.avatar %}
+                <img
+                    src="{{ target_profile.avatar.url }}"
+                    alt="{{ target_profile.user.username }}"
+                    class="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover ring-2 ring-offset-2 ring-pink-400 flex-shrink-0"
+                />
+            {% else %}
+                <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center text-white text-3xl font-bold flex-shrink-0"
+                     style="background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);">
+                    {{ target_profile.user.username|slice:":1"|upper }}
+                </div>
+            {% endif %}
+
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-3 mb-3 flex-wrap">
+                    <h1 class="font-semibold text-xl text-[#262626] leading-tight">
+                        {{ target_profile.user.username }}
+                    </h1>
+                    {% if user.is_authenticated and user.username != target_profile.user.username %}
+                    <button
+                        id="follow-btn"
+                        type="button"
+                        data-following="{{ is_following|yesno:'true,false' }}"
+                        data-follow-url="{% url 'profile_follow' target_profile.user.username %}"
+                        data-unfollow-url="{% url 'profile_unfollow' target_profile.user.username %}"
+                        class="text-sm font-semibold px-4 py-1 rounded transition-colors
+                               {% if is_following %}
+                               bg-white text-[#262626] border border-[#dbdbdb] hover:bg-gray-50
+                               {% else %}
+                               bg-[#0095f6] text-white hover:bg-blue-600
+                               {% endif %}">
+                        {% if is_following %}Following{% else %}Follow{% endif %}
+                    </button>
+                    {% endif %}
+
+                    {% if user.username == target_profile.user.username %}
+                    <a href="{% url 'complete_profile' %}"
+                       class="text-sm font-semibold px-4 py-1 rounded border border-[#dbdbdb] text-[#262626] hover:bg-gray-50 transition-colors">
+                        Edit profile
+                    </a>
+                    {% endif %}
+                </div>
+
+                <div class="hidden sm:flex gap-6">
+                    <span class="text-sm text-[#262626]">
+                        <strong>{{ posts_count }}</strong> posts
+                    </span>
+                    <span class="text-sm text-[#262626]">
+                        <strong>{{ followers_count }}</strong> followers
+                    </span>
+                    <span class="text-sm text-[#262626]">
+                        <strong>{{ following_count }}</strong> following
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        {% if target_profile.bio %}
+        <p class="text-sm text-[#262626] mb-3 leading-snug">{{ target_profile.bio }}</p>
+        {% endif %}
+
+        <div class="sm:hidden flex justify-around border-t border-[#dbdbdb] pt-3">
+            <div class="text-center">
+                <p class="font-semibold text-[#262626] text-sm">{{ posts_count }}</p>
+                <p class="text-[#8e8e8e] text-xs">posts</p>
+            </div>
+            <div class="text-center">
+                <p class="font-semibold text-[#262626] text-sm">{{ followers_count }}</p>
+                <p class="text-[#8e8e8e] text-xs">followers</p>
+            </div>
+            <div class="text-center">
+                <p class="font-semibold text-[#262626] text-sm">{{ following_count }}</p>
+                <p class="text-[#8e8e8e] text-xs">following</p>
+            </div>
         </div>
     </div>
 
-    <p class="text-gray-700 mb-6">
-      {% if target_profile.bio %}
-        {{ target_profile.bio }}
-      {% else %}
-        No bio yet.
-      {% endif %}
-    </p>
+    <div class="border-t border-[#dbdbdb] mb-1"></div>
 
-    <h2 class="font-semibold text-xl mb-4">Posts by {{ target_profile.user.username }}</h2>
-<div class="container mx-auto py-8" id="posts-container">
     {% if posts %}
-    {% include "posts/posts_list.html" %}
+        {% include "posts/posts_list.html" %}
 
-    {% if is_paginated %}
-      <div id="pagination-info" class="flex justify-center items-center py-4">
-        {% if page_obj.has_previous %}
-          <a href="?page={{ page_obj.previous_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">Previous</a>
-        {% endif %}
-        <span class="text-gray-700">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-        {% if page_obj.has_next %}
-          <a href="?page={{ page_obj.next_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2">Next</a>
-        {% endif %}
-      </div>
+        <div
+            id="scroll-sentinel"
+            data-current-page="{{ page_obj.number|default:1 }}"
+            data-total-pages="{{ page_obj.paginator.num_pages|default:1 }}"
+            class="h-4"
+        ></div>
+    {% else %}
+        <div class="flex flex-col items-center justify-center py-16 text-center px-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="#dbdbdb"
+                 stroke-width="1.5" viewBox="0 0 24 24" class="mb-3">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            <p class="text-[#8e8e8e] text-sm">No posts yet</p>
+        </div>
     {% endif %}
-
-    <div
-      id="scroll-sentinel"
-      data-current-page="{{ page_obj.number|default:1 }}"
-      data-total-pages="{{ page_obj.paginator.num_pages|default:1 }}"
-      class="h-1"
-    ></div>
-  {% else %}
-    <p class="text-gray-700">No posts yet.</p>
-  {% endif %}
 
     {% if user.username == target_profile.user.username %}
-      <form method="post" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit"
-                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-          Logout
-        </button>
-      </form>
+    <div class="px-4 py-6">
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit"
+                    class="w-full py-2 border border-[#dbdbdb] rounded text-[#262626] text-sm font-semibold hover:bg-gray-50 transition-colors">
+                Log out
+            </button>
+        </form>
+    </div>
     {% endif %}
-  </div>
-  </div>   
+
+</div>
 {% endblock content %}

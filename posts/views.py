@@ -44,7 +44,6 @@ class AllPostsView(ListView):
         context = self.get_context_data()
 
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
-
             return render(request, "posts/posts_list.html", context)
 
         return super().get(request, *args, **kwargs)

@@ -9,7 +9,7 @@ from tags.models import Tag
 
 class Post(models.Model):
     author = models.ForeignKey(Profile, on_delete=models.CASCADE)
-    caption = models.TextField()
+    caption = models.TextField(blank=True, default="")
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
@@ -19,7 +19,7 @@ class Post(models.Model):
         verbose_name_plural = "Posts"
 
     def __str__(self):
-        return f"{self.author.user.username} - {self.caption[:20]}"
+        return f"{self.author.user.username} - {self.caption[:20] or '(no caption)'}"
 
     @property
     def likes_count(self):

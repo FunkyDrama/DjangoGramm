@@ -1,31 +1,25 @@
 {% extends "base.html" %}
-{% load hashtag %}
 
-{% block title %}All Tags{% endblock title %}
+{% block title %}Tags{% endblock title %}
 
 {% block content %}
-  <div class="container mx-auto py-8 max-w-2xl">
-    <h1 class="text-2xl font-semibold mb-4">All Tags</h1>
+<div class="w-full max-w-[600px] mx-auto px-4 py-6">
+
+    <h1 class="text-base font-semibold text-[#262626] mb-4">Explore Tags</h1>
 
     {% if tags %}
-      <div class="flex flex-wrap gap-2 mb-6">
+    <div class="flex flex-wrap gap-2">
         {% for tag in tags %}
-          <a
-            href="{% url 'tagged_posts' tag.slug %}"
-            class="inline-block px-3 py-1 bg-gray-100 hover:bg-blue-100 text-gray-800 hover:text-blue-700 rounded-full text-sm font-medium transition-colors duration-150"
-          >
+        <a href="{% url 'tagged_posts' tag.slug %}"
+           class="inline-flex items-center px-3 py-1.5 bg-white border border-[#dbdbdb] rounded-full
+                  text-sm text-[#262626] font-medium hover:bg-[#fafafa] transition-colors">
             #{{ tag.name }}
-          </a>
+        </a>
         {% endfor %}
-      </div>
+    </div>
     {% else %}
-      <div class="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-3 rounded mb-4">
-        No tags yet.
-      </div>
+    <p class="text-[#8e8e8e] text-sm">No tags yet.</p>
     {% endif %}
 
-    <div class="mt-4">
-      <a href="{% url 'main' %}" class="text-blue-600 hover:underline">← Back to all posts</a>
-    </div>
-  </div>
+</div>
 {% endblock content %}
